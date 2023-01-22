@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet";
 import { prisma } from "../../src/server/db";
 import type { toDo } from "@prisma/client";
 import { api } from "../utils/api";
+import { getSession, useSession } from "next-auth/react";
 
 export async function getServerSideProps() {
   const data: toDo[] = await prisma.toDo.findMany({
@@ -20,12 +21,16 @@ const Home = ({
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<toDo[]>(todosV);
   const createTodo = api.todo.createTodo.useMutation();
-
+  
+  const session = useSession();
+  console.log(session) 
   function OnSubmitHandler(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const id = `${Math.random()}`;
     createTodo.mutate({ text: text, id: id });
+   
     setText("");
+    
     setTodos([
       {
         id: id,
@@ -36,20 +41,19 @@ const Home = ({
       ...todos,
     ]);
   }
-
   return (
     <>
       <Helmet>
         <body className="bg-primary" />
       </Helmet>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-1">
         <div className="justify-center bg-primary">
           <h1 className="pt-10 text-center text-5xl font-bold text-secondary">
             To Do App
           </h1>
           <div className="flex justify-center pt-10">
             <div className="overflow-hidden rounded-md border-4 border-thirdcolor bg-secondary">
-              <div className="h-80 w-96 flex-col overflow-y-auto">
+              <div className="h-80 w-80 flex-col overflow-y-auto">
                 {todos.map((todo) => (
                   <ToDoComponent
                     key={todo.id}
@@ -64,7 +68,7 @@ const Home = ({
           </div>
           <div className="flex justify-center pt-6">
             <form onSubmit={OnSubmitHandler}>
-              <div className="flex w-96 flex-col">
+              <div className="flex w-80 flex-col">
                 <input
                   type="text"
                   placeholder="Add a new task"
@@ -104,7 +108,6 @@ function ToDoComponent(props: ToDoProps) {
   }
   function handleCompleted() {
     updateTodo.mutate({ id: props.id, completed: !completed });
-    console.log(props.id);
     setCompleted(!completed);
   }
 
