@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,8 +11,6 @@ model User {
   id           String @id @default(cuid())
   userName     String
   userPassword String
-  toDos        toDo[]
-
   @@unique([id, userName])
 }
 
@@ -20,7 +18,5 @@ model toDo {
   id     String @id @default(cuid())
   text   String
   userId String
-  completed Boolean
-  
-  user   User   @relation(fields: [userId], references: [id])
+  completed Boolean  
 }
