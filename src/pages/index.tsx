@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet";
 import { prisma } from "../../src/server/db";
 import type { toDo } from "@prisma/client";
 import { api } from "../utils/api";
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
@@ -53,7 +53,7 @@ const Home = ({
             },
             ...todos,
           ]);
-          setText("a");
+          setText("");
         },
         onError: (error) => console.log(error),
       }
@@ -69,6 +69,19 @@ const Home = ({
           <h1 className="pt-10 text-center text-5xl font-bold text-secondary">
             To Do App
           </h1>
+          {ses && (
+            <div className="mt-5 flex items-center justify-center gap-5">
+              <p className="text-center text-secondary ">
+                Logged in as {ses.user.name}{" "}
+              </p>{" "}
+              <button
+                className="h-10 justify-center rounded-md bg-thirdcolor p-2 text-secondary"
+                onClick={() => void signOut()}
+              >
+                Logout
+              </button>
+            </div>
+          )}
           <div className="flex justify-center pt-10">
             <div className="overflow-hidden rounded-md border-4 border-thirdcolor bg-secondary">
               <div className="h-80 w-80 flex-col overflow-y-auto">
