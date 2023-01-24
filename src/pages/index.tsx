@@ -53,7 +53,7 @@ const Home = ({
             },
             ...todos,
           ]);
-          setText("");
+          setText("a");
         },
         onError: (error) => console.log(error),
       }
