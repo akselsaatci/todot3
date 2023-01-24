@@ -1,45 +1,63 @@
-import type { InferGetServerSidePropsType } from "next";
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from "next";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { prisma } from "../../src/server/db";
 import type { toDo } from "@prisma/client";
 import { api } from "../utils/api";
-import { getSession, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getSession(context);
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
   const data: toDo[] = await prisma.toDo.findMany({
+    where: { userId: session.user.id },
     orderBy: { userId: "desc" },
   });
+
   return {
-    props: { todosV: data },
+    props: { todosV: data, ses: session },
   };
 }
 
 const Home = ({
   todosV,
+  ses,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<toDo[]>(todosV);
   const createTodo = api.todo.createTodo.useMutation();
-  
-  const session = useSession();
-  console.log(session) 
+
   function OnSubmitHandler(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const id = `${Math.random()}`;
-    createTodo.mutate({ text: text, id: id });
-   
-    setText("");
-    
-    setTodos([
+    createTodo.mutate(
+      { text: text, id: id, userId: ses?.user.id },
       {
-        id: id,
-        text: text,
-        completed: false,
-        userId: "1",
-      },
-      ...todos,
-    ]);
+        onSuccess: () => {
+          setTodos([
+            {
+              id: id,
+              text: text,
+              completed: false,
+              userId: ses?.user.id,
+            },
+            ...todos,
+          ]);
+          setText("");
+        },
+        onError: (error) => console.log(error),
+      }
+    );
   }
   return (
     <>
@@ -101,14 +119,25 @@ function ToDoComponent(props: ToDoProps) {
   const updateTodo = api.todo.completeTodo.useMutation();
   const deleteTodo = api.todo.deletetoDo.useMutation();
   function deleteHandler() {
-    deleteTodo.mutate({ id: props.id });
-    props.setTodos((prev: toDo[]) =>
-      prev.filter((todo: toDo) => todo.id !== props.id)
+    deleteTodo.mutate(
+      { id: props.id },
+      {
+        onSuccess: () =>
+          props.setTodos((prev: toDo[]) =>
+            prev.filter((todo: toDo) => todo.id !== props.id)
+          ),
+        onError: (error) => console.log(error),
+      }
     );
   }
   function handleCompleted() {
-    updateTodo.mutate({ id: props.id, completed: !completed });
-    setCompleted(!completed);
+    updateTodo.mutate(
+      { id: props.id, completed: !completed },
+      {
+        onSuccess: () => setCompleted(!completed),
+        onError: (error) => console.log(error),
+      }
+    );
   }
 
   return (
