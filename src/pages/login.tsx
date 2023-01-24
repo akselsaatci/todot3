@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { GetServerSidePropsContext } from "next";
+import type { GetServerSidePropsContext } from "next";
 
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {

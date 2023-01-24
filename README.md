@@ -12,3 +12,8 @@ Register
 
 you can test it in https://todot3.vercel.app/
 deployed using vercel and planetbase(for db)
+
+
+Test account credentials:
+Username: test
+Password: 123456
