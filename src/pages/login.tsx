@@ -76,7 +76,7 @@ const Login = () => {
                 >
                   Login
                 </button>
-                <p className="text-center">or</p>
+                <p className="text-center text-secondary">or</p>
                 <Link className="inline-grid" href={"/register"}>
                   <button className="h-10 rounded-md bg-thirdcolor p-2 text-secondary">
                     Register
