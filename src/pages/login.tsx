@@ -3,7 +3,7 @@ import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import type { GetServerSidePropsContext } from "next";
-
+import Link from "next/dist/client/link";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
@@ -17,17 +17,20 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   return {
-    props: {ses: session },
+    props: { ses: session },
   };
 }
 
-
-
 const Login = () => {
-  const [username,setUsername] = useState("");
-  const [password,setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   async function clickHandle() {
-    await signIn('credentials', { redirect:true, callbackUrl: '/', username:username, password: password }).catch((err) => console.log(err));
+    await signIn("credentials", {
+      redirect: true,
+      callbackUrl: "/",
+      username: username,
+      password: password,
+    }).catch((err) => console.log(err));
   }
   const { error } = useRouter().query;
   return (
@@ -35,8 +38,8 @@ const Login = () => {
       <Helmet>
         <body className="bg-primary" />
       </Helmet>
-      <div className="container mx-auto p-4">
-        <div className="justify-center bg-primary">
+      <div className="container mx-auto">
+        <div className="justify-center bg-primary ">
           <h1 className="pt-10 text-center text-5xl font-bold text-secondary">
             Login
           </h1>
@@ -49,7 +52,9 @@ const Login = () => {
                   placeholder="Username"
                   className="h-10 rounded-md border-2 border-thirdcolor bg-secondary pl-2"
                   value={username}
-                  onChange={(e) => {setUsername(e.target.value)}}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                  }}
                 />
                 <div className="pt-2"></div>
                 <input
@@ -57,7 +62,9 @@ const Login = () => {
                   placeholder="Password"
                   className="h-10 rounded-md border-2 border-thirdcolor bg-secondary pl-2"
                   value={password}
-                  onChange={(e) => {setPassword(e.target.value)}}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
                 />
                 <div className="pt-2"></div>
                 <div className="pt-2"></div>
@@ -66,7 +73,15 @@ const Login = () => {
                     void clickHandle().catch((err) => console.log(err));
                   }}
                   className="h-10 rounded-md bg-thirdcolor p-2 text-secondary"
-                >Login</button>
+                >
+                  Login
+                </button>
+                <p className="text-center">or</p>
+                <Link className="inline-grid" href={"/register"}>
+                  <button className="h-10 rounded-md bg-thirdcolor p-2 text-secondary">
+                    Register
+                  </button>
+                </Link>
               </div>
             </form>
           </div>
@@ -90,9 +105,10 @@ const errors = {
     "Sign in failed. Check the details you provided are correct.",
   default: "Unable to sign in.",
 };
-const SignInError:React.FC<{error:string|string[] }> = ({error}) => {
-  const errorMessage = error && (errors[error as keyof typeof errors] ?? errors.default);
-  return <div className="text-center mt-5 text-secondary">{errorMessage}</div>;
+const SignInError: React.FC<{ error: string | string[] }> = ({ error }) => {
+  const errorMessage =
+    error && (errors[error as keyof typeof errors] ?? errors.default);
+  return <div className="mt-5 text-center text-secondary">{errorMessage}</div>;
 };
 
 export default Login;

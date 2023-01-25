@@ -22,7 +22,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
   const data: toDo[] = await prisma.toDo.findMany({
     where: { userId: session.user.id },
-    orderBy: { userId: "desc" },
+    orderBy: { completed: "asc" },
   });
 
   return {
