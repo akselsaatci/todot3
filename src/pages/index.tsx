@@ -8,6 +8,7 @@ import { prisma } from "../../src/server/db";
 import type { toDo } from "@prisma/client";
 import { api } from "../utils/api";
 import { getSession, signOut } from "next-auth/react";
+import LoadingSpinner from "../components/loadingSpinner";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
@@ -36,10 +37,12 @@ const Home = ({
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<toDo[]>(todosV);
   const createTodo = api.todo.createTodo.useMutation();
+  const [loading, setLoading] = useState(false);
 
   function OnSubmitHandler(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const id = `${Math.random()}`;
+    setLoading(true);
     createTodo.mutate(
       { text: text, id: id, userId: ses?.user.id },
       {
@@ -54,8 +57,12 @@ const Home = ({
             ...todos,
           ]);
           setText("");
+          setLoading(false);
         },
-        onError: (error) => console.log(error),
+        onError: (error) => {
+          console.log(error);
+          setLoading(false);
+        },
       }
     );
   }
@@ -69,6 +76,8 @@ const Home = ({
           <h1 className="pt-10 text-center text-5xl font-bold text-secondary">
             To Do App
           </h1>
+          
+
           {ses && (
             <div className="mt-5 flex items-center justify-center gap-5">
               <p className="text-center text-secondary ">
@@ -82,6 +91,9 @@ const Home = ({
               </button>
             </div>
           )}
+          <div className="mt-3 flex justify-center h-10">
+            {loading && <LoadingSpinner />}
+          </div>
           <div className="flex justify-center pt-10">
             <div className="overflow-hidden rounded-md border-4 border-thirdcolor bg-secondary">
               <div className="h-80 w-80 flex-col overflow-y-auto">
@@ -92,6 +104,7 @@ const Home = ({
                     text={todo.text}
                     completed={todo.completed}
                     setTodos={setTodos}
+                    setLoading={setLoading}
                   />
                 ))}
               </div>
@@ -124,6 +137,7 @@ type ToDoProps = {
   text: string;
   completed: boolean;
   setTodos: React.Dispatch<React.SetStateAction<toDo[]>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default Home;
 
@@ -132,23 +146,36 @@ function ToDoComponent(props: ToDoProps) {
   const updateTodo = api.todo.completeTodo.useMutation();
   const deleteTodo = api.todo.deletetoDo.useMutation();
   function deleteHandler() {
+    props.setLoading(true);
     deleteTodo.mutate(
       { id: props.id },
       {
-        onSuccess: () =>
+        onSuccess: () => {
           props.setTodos((prev: toDo[]) =>
             prev.filter((todo: toDo) => todo.id !== props.id)
-          ),
-        onError: (error) => console.log(error),
+          );
+          props.setLoading(false);
+        },
+        onError: (error) => {
+          console.log(error);
+          props.setLoading(false);
+        },
       }
     );
   }
   function handleCompleted() {
+    props.setLoading(true);
     updateTodo.mutate(
       { id: props.id, completed: !completed },
       {
-        onSuccess: () => setCompleted(!completed),
-        onError: (error) => console.log(error),
+        onSuccess: () => {
+          setCompleted(!completed);
+          props.setLoading(false);
+        },
+        onError: (error) => {
+          console.log(error);
+          props.setLoading(false);
+        },
       }
     );
   }
