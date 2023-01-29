@@ -11,7 +11,7 @@ Register
 
 
 you can test it in https://todot3.vercel.app/
-deployed using vercel and planetbase(for db)
+deployed using vercel and planetscale(for db)
 
 
 Test account credentials:
