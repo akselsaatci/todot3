@@ -194,7 +194,7 @@ function ToDoComponent(props: ToDoProps) {
         <div className="flex w-full flex-auto justify-between">
           <p
             className={
-              "transition-tag flex w-full break-words px-2 text-lg" +
+              "transition-tag flex w-full break-all px-2 text-lg" +
               (completed ? " line-a" : "")
             }
           >
